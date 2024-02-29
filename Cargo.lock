@@ -712,7 +712,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "infinit-craft-logger"
+name = "infinite-craft-logger"
 version = "0.1.0"
 dependencies = [
  "actix-cors",

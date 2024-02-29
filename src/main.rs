@@ -3,7 +3,9 @@ use std::io::prelude::*;
 use std::net::SocketAddr;
 use std::sync::Mutex;
 
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{
+    get, http::header::ContentType, post, web, App, HttpResponse, HttpServer, Responder,
+};
 use clap::Parser;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
@@ -29,8 +31,17 @@ async fn hello() -> impl Responder {
     HttpResponse::Ok().body("<h1>InfiniteCraftLogger</h1>")
 }
 
+#[get("/api/infinite-craft/recipes")]
+async fn api_recipes() -> impl Responder {
+    let recipes = RECIPES.get().unwrap().lock().unwrap();
+    let recipes = recipes.clone();
+    HttpResponse::Ok()
+        .content_type(ContentType::json())
+        .body(serde_json::to_string(&recipes).unwrap())
+}
+
 #[post("/api/infinite-craft/recipe")]
-async fn recipe(recipe: web::Json<Recipe>) -> impl Responder {
+async fn api_recipe(recipe: web::Json<Recipe>) -> impl Responder {
     let mut path = dirs::config_dir().unwrap();
     path.push("infinite_craft_recipes.json");
 
@@ -76,10 +87,19 @@ async fn main() -> std::io::Result<()> {
         .unwrap();
 
     HttpServer::new(|| {
-        let cors = actix_cors::Cors::default().allow_any_origin().allow_any_header().allow_any_method().max_age(3600);
-        App::new().wrap(cors).service(hello).service(recipe)
+        let cors = actix_cors::Cors::default()
+            .allow_any_origin()
+            .allow_any_header()
+            .allow_any_method()
+            .max_age(3600);
+
+        App::new()
+            .wrap(cors)
+            .service(hello)
+            .service(api_recipe)
+            .service(api_recipes)
     })
-        .bind(c.host)?
-        .run()
-        .await
+    .bind(c.host)?
+    .run()
+    .await
 }
