@@ -98,7 +98,7 @@ jobs:
           zip -r infinite-craft-logger-linux.zip infinite-craft-logger
 
       - name: pre-release
-        uses: softprops/action-gh-release@v2.0.6
+        uses: softprops/action-gh-release@v2.2.1
         if: "! startsWith(github.ref, 'refs/tags/')"
         with:
           tag_name: "latest"
@@ -109,7 +109,7 @@ jobs:
             infinite-craft-logger-linux.zip
 
       - name: tagged-release
-        uses: softprops/action-gh-release@v2.0.6
+        uses: softprops/action-gh-release@v2.2.1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
